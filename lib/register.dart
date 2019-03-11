@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'fms_requests.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -33,7 +34,7 @@ class RegisterPageState extends State<RegisterPage> {
   FocusNode _emailFN;
 
   Gender _gender = Gender.male;
-
+  bool loading = false;
 
   @override
   void initState() {
@@ -44,6 +45,7 @@ class RegisterPageState extends State<RegisterPage> {
     _firstNameFN = FocusNode();
     _lastNameFN = FocusNode();
     _emailFN = FocusNode();
+    setUp();
     super.initState();
   }
 
@@ -94,7 +96,7 @@ class RegisterPageState extends State<RegisterPage> {
         padding: const EdgeInsets.only(
             left: 16,
             right: 16,
-            top: 24,
+            top: 64,
             bottom: 16
         ),
         child: Text(
@@ -121,6 +123,7 @@ class RegisterPageState extends State<RegisterPage> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
+        enabled: !loading,
         controller: _serverHost,
         textInputAction: TextInputAction.next,
         focusNode: _serverHostFN,
@@ -142,6 +145,7 @@ class RegisterPageState extends State<RegisterPage> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
+        enabled: !loading,
         controller: _serverPort,
         focusNode: _serverPortFN,
         textInputAction: TextInputAction.next,
@@ -164,6 +168,7 @@ class RegisterPageState extends State<RegisterPage> {
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
         textInputAction: TextInputAction.next,
+        enabled: !loading,
         controller: _username,
         focusNode: _usernameFN,
         decoration: InputDecoration(
@@ -186,6 +191,7 @@ class RegisterPageState extends State<RegisterPage> {
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
         controller: _password,
+        enabled: !loading,
         focusNode: _passwordFN,
         obscureText: true,
         textInputAction: TextInputAction.next,
@@ -212,6 +218,7 @@ class RegisterPageState extends State<RegisterPage> {
       child: TextFormField(
         controller: _firstName,
         focusNode: _firstNameFN,
+        enabled: !loading,
         textInputAction: TextInputAction.next,
         validator: (value) {
           if (value.isEmpty)
@@ -234,6 +241,7 @@ class RegisterPageState extends State<RegisterPage> {
       child: TextFormField(
         controller: _lastName,
         focusNode: _lastNameFN,
+        enabled: !loading,
         textInputAction: TextInputAction.next,
         decoration: InputDecoration(
             border: OutlineInputBorder(
@@ -256,6 +264,7 @@ class RegisterPageState extends State<RegisterPage> {
       child: TextFormField(
         controller: _email,
         focusNode: _emailFN,
+        enabled: !loading,
         textInputAction: TextInputAction.done,
         decoration: InputDecoration(
             border: OutlineInputBorder(
@@ -309,7 +318,7 @@ class RegisterPageState extends State<RegisterPage> {
           height: 40,
           child: RaisedButton(
             color: Colors.blue,
-            onPressed: () {
+            onPressed: loading ? null : () {
               if (_formKey.currentState.validate()) {
                 Fluttertoast.showToast(msg: "Registering");
                 _register();
@@ -338,7 +347,7 @@ class RegisterPageState extends State<RegisterPage> {
             color: Colors.transparent,
             borderSide: BorderSide(color: Colors.red),
             highlightedBorderColor: Colors.red,
-            onPressed: () {
+            onPressed: loading ? null : () {
               Navigator.pop(context);
             },
             child: Text("Cancel", style: TextStyle(color: Colors.red),),
@@ -380,7 +389,11 @@ class RegisterPageState extends State<RegisterPage> {
     return regExp.hasMatch(value);
   }
 
-  _register() {
+  _register() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString("server_port", _serverPort.text);
+    prefs.setString("server_host", _serverHost.text);
+    loading = true;
     RegisterRequest registerRequest = RegisterRequest(
         username: _username.text,
         password: _password.text,
@@ -398,7 +411,14 @@ class RegisterPageState extends State<RegisterPage> {
               else {
                 Fluttertoast.showToast(msg: response.message);
               }
+              loading = false;
             }
     );
+  }
+
+  void setUp() async {
+    final prefs = await SharedPreferences.getInstance();
+    _serverHost.text = prefs.getString("server_host") ?? "";
+    _serverPort.text = prefs.get("server_port") ?? "";
   }
 }

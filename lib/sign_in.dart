@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'fms_requests.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,12 +23,15 @@ class SignInPageState extends State<SignInPage> {
   FocusNode _usernameFN;
   FocusNode _passwordFN;
 
+  bool loading = false;
+
   @override
   void initState() {
     _serverHostFN = FocusNode();
     _serverPortFN = FocusNode();
     _usernameFN = FocusNode();
     _passwordFN = FocusNode();
+    setUp();
     super.initState();
   }
 
@@ -48,7 +52,7 @@ class SignInPageState extends State<SignInPage> {
       body: Center(
         child: Form(
           key: _formKey,
-          child: Column(
+          child: ListView(
             children: <Widget>[
               _title(),
               _serverInformation(),
@@ -77,7 +81,7 @@ class SignInPageState extends State<SignInPage> {
             color: Colors.transparent,
             borderSide: BorderSide(color: Colors.red),
             highlightedBorderColor: Colors.red,
-            onPressed: () {
+            onPressed: loading ? null : () {
               Navigator.pop(context);
             },
             child: Text("Cancel", style: TextStyle(color: Colors.red),),
@@ -108,6 +112,7 @@ class SignInPageState extends State<SignInPage> {
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
         controller: _serverHost,
+        enabled: !loading,
         textInputAction: TextInputAction.next,
         focusNode: _serverHostFN,
         keyboardType: TextInputType.number,
@@ -129,6 +134,7 @@ class SignInPageState extends State<SignInPage> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
+        enabled: !loading,
         controller: _serverPort,
         focusNode: _serverPortFN,
         textInputAction: TextInputAction.next,
@@ -152,6 +158,7 @@ class SignInPageState extends State<SignInPage> {
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
         textInputAction: TextInputAction.next,
+        enabled: !loading,
         controller: _username,
         focusNode: _usernameFN,
         decoration: InputDecoration(
@@ -172,6 +179,7 @@ class SignInPageState extends State<SignInPage> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
+        enabled: !loading,
         controller: _password,
         focusNode: _passwordFN,
         obscureText: true,
@@ -222,7 +230,7 @@ class SignInPageState extends State<SignInPage> {
           height: 40,
           child: RaisedButton(
             color: Colors.blue,
-            onPressed: () {
+            onPressed: loading ? null : () {
               if (_formKey.currentState.validate()) {
                 Fluttertoast.showToast(msg: 'Signing in');
                 _login();
@@ -232,7 +240,7 @@ class SignInPageState extends State<SignInPage> {
                         "Unable to sign in. Please check to make sure information is correct.");
               }
             },
-            child: Text(
+            child: loading ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Colors.white),) : Text(
               "Sign In",
               style: TextStyle(color: Colors.white),
             ),
@@ -258,26 +266,33 @@ class SignInPageState extends State<SignInPage> {
     return regExp.hasMatch(value);
   }
 
-  _login() {
+  _login() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString("server_host", _serverHost.text);
+    prefs.setString("server_port", _serverPort.text);
+    setState(() {
+      loading = true;
+    });
     LoginRequest loginRequest = LoginRequest(
       username: _username.text,
       password: _password.text,
     );
-    http
-        .post(
-            "http://" +
-                _serverHost.text +
-                ":" +
-                _serverPort.text +
-                "/user/login",
-            body: loginRequest.toJson().toString())
-        .then((result) {
-      LoginResponse response = LoginResponse.fromJson(jsonDecode(result.body));
-      if (response.success)
-        Fluttertoast.showToast(msg: "Successfully loggef you in :)");
-      else {
-        Fluttertoast.showToast(msg: response.message);
-      }
+    http.post("http://" + _serverHost.text + ":" + _serverPort.text + "/user/login",
+            body: loginRequest.toJson().toString()).then((result) {
+        LoginResponse response = LoginResponse.fromJson(jsonDecode(result.body));
+        if (response.success)
+          Fluttertoast.showToast(msg: "Successfully logged you in :)");
+        else
+          Fluttertoast.showToast(msg: response.message);
+      setState(() {
+        loading = false;
+      });
     });
+  }
+
+  void setUp() async {
+    final prefs = await SharedPreferences.getInstance();
+    _serverHost.text = prefs.getString("server_host") ?? "";
+    _serverPort.text = prefs.get("server_port") ?? "";
   }
 }

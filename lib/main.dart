@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'sign_in.dart';
 import 'register.dart';
-import 'animations.dart';
-
+import 'fms_requests.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,9 +30,6 @@ class MyHomePage extends StatefulWidget {
 
 /// This is the state for the homepage
 class _MyHomePageState extends State<MyHomePage> {
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,10 +105,6 @@ class _MyHomePageState extends State<MyHomePage> {
         Text("Family Map", style: TextStyle(fontSize: 48, color: Colors.white),),
       ],
     );
-  }
-
-  _showToast(String msg) {
-    Fluttertoast.showToast(msg: msg);
   }
 
   @override

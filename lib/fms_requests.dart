@@ -1,3 +1,6 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
+
 class RegisterRequest {
   final String username;
   final String password;
