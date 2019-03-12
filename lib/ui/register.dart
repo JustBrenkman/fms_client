@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fms_client/fms_requests.dart';
 import 'package:http/http.dart' as http;
-import 'fms_requests.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -393,6 +393,8 @@ class RegisterPageState extends State<RegisterPage> {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString("server_port", _serverPort.text);
     prefs.setString("server_host", _serverHost.text);
+    prefs.setString("username", _username.text);
+    prefs.setString("password", _password.text);
     loading = true;
     RegisterRequest registerRequest = RegisterRequest(
         username: _username.text,
@@ -420,5 +422,7 @@ class RegisterPageState extends State<RegisterPage> {
     final prefs = await SharedPreferences.getInstance();
     _serverHost.text = prefs.getString("server_host") ?? "";
     _serverPort.text = prefs.get("server_port") ?? "";
+    _password.text = prefs.getString("password") ?? "";
+    _username.text = prefs.getString("username") ?? "";
   }
 }

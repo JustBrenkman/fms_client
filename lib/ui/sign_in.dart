@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fms_client/fms_requests.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'fms_requests.dart';
 import 'package:http/http.dart' as http;
 
 class SignInPage extends StatefulWidget {
@@ -270,6 +270,8 @@ class SignInPageState extends State<SignInPage> {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString("server_host", _serverHost.text);
     prefs.setString("server_port", _serverPort.text);
+    prefs.setString("username", _username.text);
+    prefs.setString("password", _password.text);
     setState(() {
       loading = true;
     });
@@ -280,9 +282,12 @@ class SignInPageState extends State<SignInPage> {
     http.post("http://" + _serverHost.text + ":" + _serverPort.text + "/user/login",
             body: loginRequest.toJson().toString()).then((result) {
         LoginResponse response = LoginResponse.fromJson(jsonDecode(result.body));
-        if (response.success)
+        if (response.success) {
           Fluttertoast.showToast(msg: "Successfully logged you in :)");
-        else
+          prefs.setString("auth_token", response.authToken);
+          Navigator.pushNamedAndRemoveUntil(context, "/mymap", (_) => false);
+//          Navigator.pushAndRemoveUntil(context, new MaterialPageRoute(builder: (context) => MapPage()), (_) => false);
+        } else
           Fluttertoast.showToast(msg: response.message);
       setState(() {
         loading = false;
@@ -294,5 +299,7 @@ class SignInPageState extends State<SignInPage> {
     final prefs = await SharedPreferences.getInstance();
     _serverHost.text = prefs.getString("server_host") ?? "";
     _serverPort.text = prefs.get("server_port") ?? "";
+    _password.text = prefs.getString("password") ?? "";
+    _username.text = prefs.getString("username") ?? "";
   }
 }

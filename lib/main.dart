@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'sign_in.dart';
-import 'register.dart';
-import 'fms_requests.dart';
+import 'package:fms_client/ui/filter.dart';
+import 'package:fms_client/ui/map.dart';
+import 'package:fms_client/ui/search.dart';
+import 'package:fms_client/ui/settings.dart';
+import 'package:fms_client/ui/sign_in.dart';
+import 'package:fms_client/ui/register.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      initialRoute: "/",
+      routes: {
+        "/": (context) => MyHomePage(title: "Family Map",),
+        "/mymap": (context) => MapPage(),
+        "/settings": (context) => SettingPage(),
+        "/search": (context) => SearchPage(),
+        "/filter": (context) => FilterPage(),
+      },
+      title: 'My Family Map',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Family Map'),
     );
   }
 }
