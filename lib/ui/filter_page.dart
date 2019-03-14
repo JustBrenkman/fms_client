@@ -12,6 +12,7 @@ class Filter {
   bool mothersEvents = true;
   bool maleEvents = true;
   bool femaleEvents = true;
+  bool travelEvents = true;
 
   static Filter _instance;
 
@@ -22,6 +23,7 @@ class Filter {
     censusEvents = preferences.getBool("censusEvents") ?? true;
     christeningEvents = preferences.getBool("christeningEvents") ?? true;
     deathEvents = preferences.getBool("deathEvents") ?? true;
+    travelEvents = preferences.getBool("travelEvents") ?? true;
     fathersEvents = preferences.getBool("fathersEvents") ?? true;
     mothersEvents = preferences.getBool("mothersEvents") ?? true;
     maleEvents = preferences.getBool("maleEvents") ?? true;
@@ -34,13 +36,14 @@ class Filter {
     preferences.setBool("censusEvents", censusEvents);
     preferences.setBool("christeningEvents", christeningEvents);
     preferences.setBool("deathEvents", deathEvents);
+    preferences.setBool("travelEvents", travelEvents);
     preferences.setBool("fathersEvents", fathersEvents);
     preferences.setBool("mothersEvents", mothersEvents);
     preferences.setBool("maleEvents", maleEvents);
     preferences.setBool("femaleEvents", femaleEvents);
   }
 
-  static Future<Filter> getInstance() async {
+  static Filter getInstance() {
     if (_instance == null) {
       _instance = Filter();
       _instance._load();
@@ -90,6 +93,7 @@ class FilterPageState extends State<FilterPage> {
           _christeningTile(),
           _deathTile(),
           _marriageTile(),
+          _travelTile(),
           _fatherTile(),
           _motherTile(),
           _maleTile(),
@@ -178,6 +182,15 @@ class FilterPageState extends State<FilterPage> {
       title: Text("Female Events"),
       trailing: Switch(value: filter.femaleEvents, onChanged: (value) {setState(() {
         filter.femaleEvents = value;
+      });}),
+    );
+  }
+
+  Widget _travelTile() {
+    return ListTile(
+      title: Text("Travel Events"),
+      trailing: Switch(value: filter.travelEvents, onChanged: (value) {setState(() {
+        filter.travelEvents = value;
       });}),
     );
   }

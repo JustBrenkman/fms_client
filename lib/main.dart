@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fms_client/ui/filter.dart';
-import 'package:fms_client/ui/map.dart';
-import 'package:fms_client/ui/search.dart';
-import 'package:fms_client/ui/settings.dart';
-import 'package:fms_client/ui/sign_in.dart';
-import 'package:fms_client/ui/register.dart';
-void main() => runApp(MyApp());
+import 'package:fms_client/ui/filter_page.dart';
+import 'package:fms_client/ui/map_page.dart';
+import 'package:fms_client/ui/person_page.dart';
+import 'package:fms_client/ui/search_page.dart';
+import 'package:fms_client/ui/settings_page.dart';
+import 'package:fms_client/ui/sign_in_page.dart';
+import 'package:fms_client/ui/register_page.dart';
+void main() {
+  Filter.getInstance();
+  Settings.getInstance();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -19,6 +24,7 @@ class MyApp extends StatelessWidget {
         "/settings": (context) => SettingPage(),
         "/search": (context) => SearchPage(),
         "/filter": (context) => FilterPage(),
+        "/person": (context) => PersonPage(),
       },
       title: 'My Family Map',
       theme: ThemeData(
@@ -40,6 +46,7 @@ class MyHomePage extends StatefulWidget {
 
 /// This is the state for the homepage
 class _MyHomePageState extends State<MyHomePage> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:fms_client/fms_requests.dart';
+import 'package:fms_client/fms_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
+import 'package:fms_client/server.dart';
 
 class SignInPage extends StatefulWidget {
   @override
@@ -268,10 +266,10 @@ class SignInPageState extends State<SignInPage> {
 
   _login() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString("server_host", _serverHost.text);
-    prefs.setString("server_port", _serverPort.text);
-    prefs.setString("username", _username.text);
-    prefs.setString("password", _password.text);
+    await prefs.setString("server_host", _serverHost.text);
+    await prefs.setString("server_port", _serverPort.text);
+    await prefs.setString("username", _username.text);
+    await prefs.setString("password", _password.text);
     setState(() {
       loading = true;
     });
@@ -279,14 +277,13 @@ class SignInPageState extends State<SignInPage> {
       username: _username.text,
       password: _password.text,
     );
-    http.post("http://" + _serverHost.text + ":" + _serverPort.text + "/user/login",
-            body: loginRequest.toJson().toString()).then((result) {
-        LoginResponse response = LoginResponse.fromJson(jsonDecode(result.body));
+    ServerProxy serverProxy = await ServerProxy.getInstance();
+    serverProxy.send("/user/login", loginRequest.toJson()).then((result) {
+      LoginResponse response = LoginResponse.fromJson(result);
         if (response.success) {
           Fluttertoast.showToast(msg: "Successfully logged you in :)");
           prefs.setString("auth_token", response.authToken);
           Navigator.pushNamedAndRemoveUntil(context, "/mymap", (_) => false);
-//          Navigator.pushAndRemoveUntil(context, new MaterialPageRoute(builder: (context) => MapPage()), (_) => false);
         } else
           Fluttertoast.showToast(msg: response.message);
       setState(() {
