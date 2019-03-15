@@ -35,6 +35,7 @@ class RegisterPageState extends State<RegisterPage> {
 
   Gender _gender = Gender.male;
   bool loading = false;
+  bool canLogin = false;
 
   @override
   void initState() {
@@ -128,6 +129,7 @@ class RegisterPageState extends State<RegisterPage> {
         textInputAction: TextInputAction.next,
         focusNode: _serverHostFN,
         keyboardType: TextInputType.number,
+        onEditingComplete: _disableButton,
         validator: (value) {
           if (value.isEmpty || !isNotHost(value))
             return 'Please fill in server host eg 192.168.0.1';
@@ -150,6 +152,7 @@ class RegisterPageState extends State<RegisterPage> {
         focusNode: _serverPortFN,
         textInputAction: TextInputAction.next,
         keyboardType: TextInputType.number,
+        onEditingComplete: _disableButton,
         validator: (value) {
           if (value.isEmpty || !isNumeric(value))
             return 'Please fill in server host';
@@ -171,6 +174,7 @@ class RegisterPageState extends State<RegisterPage> {
         enabled: !loading,
         controller: _username,
         focusNode: _usernameFN,
+        onEditingComplete: _disableButton,
         decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -194,6 +198,7 @@ class RegisterPageState extends State<RegisterPage> {
         enabled: !loading,
         focusNode: _passwordFN,
         obscureText: true,
+        onEditingComplete: _disableButton,
         textInputAction: TextInputAction.next,
         validator: (value) {
           if (value.isEmpty)
@@ -219,6 +224,7 @@ class RegisterPageState extends State<RegisterPage> {
         controller: _firstName,
         focusNode: _firstNameFN,
         enabled: !loading,
+        onEditingComplete: _disableButton,
         textInputAction: TextInputAction.next,
         validator: (value) {
           if (value.isEmpty)
@@ -242,6 +248,7 @@ class RegisterPageState extends State<RegisterPage> {
         controller: _lastName,
         focusNode: _lastNameFN,
         enabled: !loading,
+        onEditingComplete: _disableButton,
         textInputAction: TextInputAction.next,
         decoration: InputDecoration(
             border: OutlineInputBorder(
@@ -265,6 +272,10 @@ class RegisterPageState extends State<RegisterPage> {
         controller: _email,
         focusNode: _emailFN,
         enabled: !loading,
+        onEditingComplete: () {
+          _disableButton();
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
         textInputAction: TextInputAction.done,
         decoration: InputDecoration(
             border: OutlineInputBorder(
@@ -318,7 +329,7 @@ class RegisterPageState extends State<RegisterPage> {
           height: 40,
           child: RaisedButton(
             color: Colors.blue,
-            onPressed: loading ? null : () {
+            onPressed: loading || !canLogin ? null : () {
               if (_formKey.currentState.validate()) {
                 Fluttertoast.showToast(msg: "Registering");
                 _register();
@@ -424,5 +435,17 @@ class RegisterPageState extends State<RegisterPage> {
     _serverPort.text = prefs.get("server_port") ?? "";
     _password.text = prefs.getString("password") ?? "";
     _username.text = prefs.getString("username") ?? "";
+    _disableButton();
+  }
+
+  void _disableButton() {
+    if (_username.text.isNotEmpty && _serverHost.text.isNotEmpty && _serverPort.text.isNotEmpty && _password.text.isNotEmpty && _email.text.isNotEmpty && _firstName.text.isNotEmpty && _lastName.text.isNotEmpty)
+      setState(() {
+        canLogin = true;
+      });
+    else
+      setState(() {
+        canLogin = false;
+      });
   }
 }

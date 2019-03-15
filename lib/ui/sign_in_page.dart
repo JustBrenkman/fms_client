@@ -22,6 +22,7 @@ class SignInPageState extends State<SignInPage> {
   FocusNode _passwordFN;
 
   bool loading = false;
+  bool canLogin = false;
 
   @override
   void initState() {
@@ -29,8 +30,10 @@ class SignInPageState extends State<SignInPage> {
     _serverPortFN = FocusNode();
     _usernameFN = FocusNode();
     _passwordFN = FocusNode();
+
     setUp();
     super.initState();
+    _disableButton();
   }
 
   @override
@@ -114,6 +117,7 @@ class SignInPageState extends State<SignInPage> {
         textInputAction: TextInputAction.next,
         focusNode: _serverHostFN,
         keyboardType: TextInputType.number,
+        onEditingComplete: _disableButton,
         validator: (value) {
           if (value.isEmpty || !isNotHost(value))
             return 'Please fill in server host eg 192.168.0.1';
@@ -137,6 +141,7 @@ class SignInPageState extends State<SignInPage> {
         focusNode: _serverPortFN,
         textInputAction: TextInputAction.next,
         keyboardType: TextInputType.number,
+        onEditingComplete: _disableButton,
         validator: (value) {
           if (value.isEmpty || !isNumeric(value))
             return 'Please fill in server host';
@@ -159,6 +164,7 @@ class SignInPageState extends State<SignInPage> {
         enabled: !loading,
         controller: _username,
         focusNode: _usernameFN,
+        onEditingComplete: _disableButton,
         decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -182,6 +188,10 @@ class SignInPageState extends State<SignInPage> {
         focusNode: _passwordFN,
         obscureText: true,
         textInputAction: TextInputAction.done,
+        onEditingComplete: () {
+          _disableButton();
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
         validator: (value) {
           if (value.isEmpty) return "Please enter a password";
           if (value.length < 8) return "Password must be 8 or more characters";
@@ -228,7 +238,7 @@ class SignInPageState extends State<SignInPage> {
           height: 40,
           child: RaisedButton(
             color: Colors.blue,
-            onPressed: loading ? null : () {
+            onPressed: loading || !canLogin ? null : () {
               if (_formKey.currentState.validate()) {
                 Fluttertoast.showToast(msg: 'Signing in');
                 _login();
@@ -295,8 +305,24 @@ class SignInPageState extends State<SignInPage> {
   void setUp() async {
     final prefs = await SharedPreferences.getInstance();
     _serverHost.text = prefs.getString("server_host") ?? "";
-    _serverPort.text = prefs.get("server_port") ?? "";
+    _serverPort.text = await prefs.get("server_port") ?? "";
     _password.text = prefs.getString("password") ?? "";
     _username.text = prefs.getString("username") ?? "";
+//    if (_username.text.isNotEmpty && _serverHost.text.isNotEmpty && _serverPort.text.isNotEmpty && _password.text.isNotEmpty)
+//        canLogin = true;
+//    else
+//        canLogin = false;
+    _disableButton();
+  }
+
+  void _disableButton() {
+    if (_username.text.isNotEmpty && _serverHost.text.isNotEmpty && _serverPort.text.isNotEmpty && _password.text.isNotEmpty)
+      setState(() {
+        canLogin = true;
+      });
+    else
+      setState(() {
+        canLogin = false;
+      });
   }
 }

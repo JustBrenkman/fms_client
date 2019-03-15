@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -51,7 +52,6 @@ String _decodeBase64(String str) {
 class ServerProxy {
   String serverHost;
   String serverPort;
-//  var client = ;
 
   ServerProxy({this.serverHost, this.serverPort});
 
@@ -67,8 +67,13 @@ class ServerProxy {
 
   Future<Map<String, dynamic>> send(String url, Map<String, dynamic> body) async {
     Map<String, dynamic> returnVal;
-//    var client = http.Client();
-    await http.post("http://" + serverHost + ":" + serverPort + url, body: body.toString()).then((response) {returnVal = jsonDecode(response.body);});
+    try {
+      await http.post("http://" + serverHost + ":" + serverPort + url, body: body.toString()).then((response) {returnVal = jsonDecode(response.body);}).catchError(() {
+        returnVal = {'success': false, 'message': 'Sever internal error, try again later'};
+      });
+    } catch (SocketException) {
+      returnVal = {'success': false, 'message': 'Sever error, could not connect'};
+    }
     return returnVal;
   }
 
@@ -76,8 +81,13 @@ class ServerProxy {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String auth_token = preferences.getString("auth_token");
     Map<String, dynamic> returnVal;
-//    var client = http.Client();
-    await http.get("http://" + serverHost + ":" + serverPort + url, headers: {'auth_token': auth_token}).then((response) {returnVal = jsonDecode(response.body);});
+    try {
+      await http.get("http://" + serverHost + ":" + serverPort + url, headers: {'auth_token': auth_token}).then((response) {returnVal = jsonDecode(response.body);}).catchError(() {
+        returnVal = {'success': false, 'message': 'Sever error, could not connect'};
+      });
+    } catch (SocketException) {
+      returnVal = {'success': false, 'message': 'Sever error, could not connect'};
+    }
     return returnVal;
   }
 
@@ -85,7 +95,13 @@ class ServerProxy {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String auth_token = preferences.getString("auth_token");
     Map<String, dynamic> returnVal;
-    await http.post("http://" + serverHost + ":" + serverPort + url, body: body.toString(), headers: {'auth_token': auth_token}).then((response) {returnVal = jsonDecode(response.body);});
+    try {
+      await http.post("http://" + serverHost + ":" + serverPort + url, body: body.toString(), headers: {'auth_token': auth_token}).then((response) {returnVal = jsonDecode(response.body);}).catchError(() {
+        returnVal = {'success': false, 'message': 'Sever error, could not connect'};
+      });
+    } catch (SocketException) {
+      returnVal = {'success': false, 'message': 'Sever error, could not connect'};
+    }
     return returnVal;
   }
 }
