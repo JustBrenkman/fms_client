@@ -215,7 +215,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void _triggerMarkerUpload() {
-    if (!dataCache.loading) {
+    if (!dataCache.loading && _controller != null) {
       _controller.clearMarkers();
       if (_controller != null && dataCache.getEvents() != null) {
         dataCache.getEvents().forEach((event) {
