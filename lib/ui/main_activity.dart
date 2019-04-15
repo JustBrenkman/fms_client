@@ -12,13 +12,9 @@ class MainActivity extends StatefulWidget {
 }
 
 class MainActivityState extends State<MainActivity> {
-  GoogleMapController _controller;
   Map<String, Marker> markers = <String, Marker>{};
   String selectedMarker;
   DataCache dataCache;
-  Marker _selectedMarker;
-  Person _selectedPerson;
-  Event _selectedEvent;
   Map<Marker, Event> eventMarkers = new Map();
   Settings settings;
   Filter filterSettings;
@@ -43,6 +39,7 @@ class MainActivityState extends State<MainActivity> {
               icon: Icon(Icons.filter_list),
               onPressed: dataCacheSync ? null : () async {
                 await Navigator.pushNamed(context, "/filter");
+                _mapFragmentController.triggerReset();
                 _mapFragmentController.triggerMarkerUpload();
               }),
           IconButton(
@@ -66,29 +63,21 @@ class MainActivityState extends State<MainActivity> {
     filterSettings = Filter.getInstance();
     dataCache = DataCache.getInstance();
     dataCache.setOnStartSync(() {
-      _selectedPerson = null;
-      _selectedEvent = null;
-      _selectedMarker = null;
       setState(() {
         dataCacheSync = true;
       });
+      if (_mapFragmentController != null)
+        _mapFragmentController.triggerReset();
     });
     dataCache.setOnFinishedSync(() {
       setState(() {
         dataCacheSync = false;
+        if (_mapFragmentController != null)
+          _mapFragmentController.triggerMarkerUpload();
       });
     });
     dataCache.load();
     super.initState();
-  }
-
-  _addPolyLine() {
-    final List<LatLng> points = <LatLng>[
-      LatLng(40.257212, -111.667706),
-      LatLng(41.257212, -110.667706),
-    ];
-    _controller.addPolyline(PolylineOptions(
-        points: points, color: Colors.blue.value, visible: true, width: 10));
   }
 
   void _onMapFragmentCreated(MapFragmentController fragmentController) {

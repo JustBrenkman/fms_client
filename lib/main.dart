@@ -26,7 +26,6 @@ class MyApp extends StatelessWidget {
         "/settings": (context) => SettingActivity(),
         "/search": (context) => SearchActivity(),
         "/filter": (context) => FilterActivity(),
-//        "/person": (context) => PersonPage(),
       },
       title: 'My Family Map',
       theme: ThemeData(

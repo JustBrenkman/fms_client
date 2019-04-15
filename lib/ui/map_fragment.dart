@@ -48,8 +48,9 @@ class MapFragmentState extends State<MapFragment> {
     filterSettings = Filter.getInstance();
     dataCache = DataCache.getInstance();
     type = settings.mapType;
+    _selectedEvent = widget.event;
     super.initState();
-    onFragmentCreated(MapFragmentController(_triggerMarkerUpload));
+    onFragmentCreated(MapFragmentController(_triggerMarkerUpload, _reset));
   }
 
   @override
@@ -70,6 +71,12 @@ class MapFragmentState extends State<MapFragment> {
         ),
       ],
     );
+  }
+
+  void _reset() {
+    _selectedPerson = null;
+    _selectedEvent = null;
+    _selectedMarker = null;
   }
 
   Widget _bottomSheet() {
@@ -163,6 +170,7 @@ class MapFragmentState extends State<MapFragment> {
       _selectedEvent = eventMarkers[marker];
       _selectedPerson = dataCache.getPersonData(_selectedEvent.personId);
     });
+    _processPolyLines();
   }
 
   void _selectEvent(Event event) {
@@ -197,6 +205,7 @@ class MapFragmentState extends State<MapFragment> {
         });
       }
     }
+    _processPolyLines();
   }
 
   _addEventMarker(Event event) async {
@@ -208,14 +217,95 @@ class MapFragmentState extends State<MapFragment> {
     ));
     eventMarkers[marker] = event;
   }
+
+  void _processPolyLines() {
+    if (_controller != null)
+      _controller.clearPolylines();
+    if (_selectedEvent != null) {
+      if (settings.spouseLinesView) {
+        Event spouseBirthEvent = dataCache.getSpouseEvent(_selectedEvent);
+        if (spouseBirthEvent != null)
+          _addPloyLine(_selectedEvent, spouseBirthEvent, settings.spouseLines);
+      }
+      if (settings.lifeStoryLinesView) {
+        List<Event> lifeStory = dataCache.getLifeStoryEvents(_selectedEvent);
+        Event previous;
+        lifeStory.forEach((item) {
+          if (previous != null)
+            _addPloyLine(previous, item, settings.lifeStoryLines);
+          previous = item;
+        });
+      }
+      if (settings.familyTreeLinesView) {
+        addParentLinesR(dataCache.getPersonComplexData(_selectedEvent.personId), 30, event: _selectedEvent);
+      }
+    }
+  }
+
+  void _addPloyLine(Event eventA, Event eventB, Color color) {
+    _addPolyLine(eventA, eventB, color, 10);
+  }
+
+  void _addPolyLine(Event eventA, Event eventB, Color color, double lineWidth) {
+    if (eventA != null && eventB != null) {
+      final List<LatLng> points = <LatLng>[
+        LatLng(eventA.latitude, eventA.longitude),
+        LatLng(eventB.latitude, eventB.longitude),
+      ];
+      _controller.addPolyline(PolylineOptions(
+          points: points, color: color.value, visible: true, width: lineWidth
+      ));
+    }
+  }
+
+  void addParentLinesR(PersonComplex person, double lineWidth, {Event event}) {
+    if (person == null)
+      return;
+
+    if (lineWidth < 0)
+      lineWidth = 1;
+
+    PersonComplex temp = dataCache.getPersonComplexData(person.person.id);
+    if (temp == null)
+      return;
+    PersonComplex father = temp.father;
+
+    temp = dataCache.getPersonComplexData(person.person.id);
+    if (temp == null)
+      return;
+    PersonComplex mother = temp.mother;
+
+    Event fatherEvent = dataCache.getEarliestEvent(father);
+    Event motherEvent = dataCache.getEarliestEvent(mother);
+    Event self;
+    if (event != null)
+      self = event;
+    else
+      self = dataCache.getEarliestEvent(person);
+
+    _addPolyLine(fatherEvent, self, settings.familyTreeLines, lineWidth);
+    _addPolyLine(motherEvent, self, settings.familyTreeLines, lineWidth);
+
+    if (mother != null)
+      addParentLinesR(mother, lineWidth - 10);
+    if (father != null)
+      addParentLinesR(father, lineWidth - 10);
+
+    return;
+  }
 }
 
 class MapFragmentController {
   VoidCallback _triggerMarkerUpload;
+  VoidCallback _reset;
 
-  MapFragmentController(this._triggerMarkerUpload);
+  MapFragmentController(this._triggerMarkerUpload, this._reset);
 
   void triggerMarkerUpload() {
     _triggerMarkerUpload();
+  }
+
+  void triggerReset() {
+    _reset();
   }
 }

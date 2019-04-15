@@ -169,6 +169,50 @@ class DataCache {
         return _dive(person.child);
     return person;
   }
+
+  Event getSpouseEvent(Event selectedEvent) {
+    PersonComplex person = familyTree.containsKey(selectedEvent.
+personId) ? familyTree[selectedEvent.personId] : null;
+    PersonComplex spouse = person.spouse;
+    List<Event> events = getEventsForPerson(spouse.person.id);
+    Event event;
+    events.sort((a, b) => a.year.compareTo(b.year));
+    for (final item in events) {
+      if (shouldDisplayEventMarker(item)) {
+        event = item;
+        break;
+      }
+    }
+    return event;
+  }
+
+  List<Event> getLifeStoryEvents(Event selected) {
+    List<Event> list = getEventsForPerson(selected.personId);
+    list.sort((a, b) => a.year.compareTo(b.year));
+    list.removeWhere((event) => !shouldDisplayEventMarker(event));
+    return list;
+  }
+
+  PersonComplex getPersonComplexData(String personId) {
+    return familyTree.containsKey(personId) ? familyTree[personId] : null;
+  }
+
+  Event getEarliestEvent(PersonComplex person) {
+    if (person == null)
+      return null;
+    if (person.person == null)
+      return null;
+    List<Event> events = getEventsForPerson(person.person.id);
+    Event event;
+    events.sort((a, b) => a.year.compareTo(b.year));
+    for (final item in events) {
+      if (shouldDisplayEventMarker(item)) {
+        event = item;
+        break;
+      }
+    }
+    return event;
+  }
 }
 
 class PersonComplex {
@@ -236,8 +280,8 @@ class PlatformBridge {
 
   static Future<void> runTest() async {
     try {
-      final String message = await _platform.invokeMethod("getString");
-      print("Message: " + message);
+//      final String message = await _platform.invokeMethod("getString");
+//      print("Message: " + message);
       final int testInt = await _platform.invokeMethod("getInt");
       print("Int: " + testInt.toString());
 //      final List<String> messages = await _platform.invokeMethod("getStringList");
