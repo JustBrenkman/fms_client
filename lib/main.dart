@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fms_client/ui/filter_page.dart';
-import 'package:fms_client/ui/map_page.dart';
-import 'package:fms_client/ui/person_page.dart';
-import 'package:fms_client/ui/search_page.dart';
-import 'package:fms_client/ui/settings_page.dart';
-import 'package:fms_client/ui/sign_in_page.dart';
-import 'package:fms_client/ui/register_page.dart';
+import 'package:fms_client/redux/app_data.dart';
+import 'package:fms_client/ui/filter_activity.dart';
+import 'package:fms_client/ui/main_activity.dart';
+import 'package:fms_client/ui/search_activity.dart';
+import 'package:fms_client/ui/settings_activity.dart';
+import 'package:fms_client/ui/sign_in_fragment.dart';
+import 'package:fms_client/ui/register_fragment.dart';
+
 void main() {
   Filter.getInstance();
   Settings.getInstance();
+  PlatformBridge.instance;
   runApp(MyApp());
 }
 
@@ -20,11 +22,11 @@ class MyApp extends StatelessWidget {
       initialRoute: "/",
       routes: {
         "/": (context) => MyHomePage(title: "Family Map",),
-        "/mymap": (context) => MapPage(),
-        "/settings": (context) => SettingPage(),
-        "/search": (context) => SearchPage(),
-        "/filter": (context) => FilterPage(),
-        "/person": (context) => PersonPage(),
+        "/mymap": (context) => MainActivity(),
+        "/settings": (context) => SettingActivity(),
+        "/search": (context) => SearchActivity(),
+        "/filter": (context) => FilterActivity(),
+//        "/person": (context) => PersonPage(),
       },
       title: 'My Family Map',
       theme: ThemeData(
@@ -73,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Text("Sign in".toUpperCase(), style: TextStyle(fontSize: 16, color: Colors.blueGrey),),
           ),
           onPressed: () => {
-            Navigator.push(context, new MaterialPageRoute(builder: (context) => SignInPage()))
+            Navigator.push(context, new MaterialPageRoute(builder: (context) => SignInFragment()))
           },
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16))
@@ -92,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Text("Register".toUpperCase(), style: TextStyle(fontSize: 16, color: Colors.blueGrey),),
           ),
           onPressed: () => {
-            Navigator.push(context, new MaterialPageRoute(builder: (context) => RegisterPage()))
+            Navigator.push(context, new MaterialPageRoute(builder: (context) => RegisterFragment()))
           },
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16))
@@ -128,5 +130,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     super.initState();
+    PlatformBridge.runTest();
   }
 }

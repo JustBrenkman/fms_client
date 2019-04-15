@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -68,9 +67,10 @@ class ServerProxy {
   Future<Map<String, dynamic>> send(String url, Map<String, dynamic> body) async {
     Map<String, dynamic> returnVal;
     try {
-      await http.post("http://" + serverHost + ":" + serverPort + url, body: body.toString()).then((response) {returnVal = jsonDecode(response.body);}).catchError(() {
-        returnVal = {'success': false, 'message': 'Sever internal error, try again later'};
-      });
+      await http.post("http://" + serverHost + ":" + serverPort + url, body: body.toString()).then((response) {returnVal = jsonDecode(response.body);});
+//          .catchError(() {
+//        returnVal = {'success': false, 'message': 'Sever internal error, try again later'};
+//      });
     } catch (SocketException) {
       returnVal = {'success': false, 'message': 'Sever error, could not connect'};
     }
@@ -82,9 +82,7 @@ class ServerProxy {
     String auth_token = preferences.getString("auth_token");
     Map<String, dynamic> returnVal;
     try {
-      await http.get("http://" + serverHost + ":" + serverPort + url, headers: {'auth_token': auth_token}).then((response) {returnVal = jsonDecode(response.body);}).catchError(() {
-        returnVal = {'success': false, 'message': 'Sever error, could not connect'};
-      });
+      await http.get("http://" + serverHost + ":" + serverPort + url, headers: {'auth_token': auth_token}).then((response) {returnVal = jsonDecode(response.body);});
     } catch (SocketException) {
       returnVal = {'success': false, 'message': 'Sever error, could not connect'};
     }
@@ -96,9 +94,10 @@ class ServerProxy {
     String auth_token = preferences.getString("auth_token");
     Map<String, dynamic> returnVal;
     try {
-      await http.post("http://" + serverHost + ":" + serverPort + url, body: body.toString(), headers: {'auth_token': auth_token}).then((response) {returnVal = jsonDecode(response.body);}).catchError(() {
-        returnVal = {'success': false, 'message': 'Sever error, could not connect'};
-      });
+      await http.post("http://" + serverHost + ":" + serverPort + url, body: body.toString(), headers: {'auth_token': auth_token}).then((response) {returnVal = jsonDecode(response.body);});
+//      .catchError(() {
+//        returnVal = {'success': false, 'message': 'Sever error, could not connect'};
+//      });
     } catch (SocketException) {
       returnVal = {'success': false, 'message': 'Sever error, could not connect'};
     }

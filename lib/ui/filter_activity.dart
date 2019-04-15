@@ -52,12 +52,12 @@ class Filter {
   }
 }
 
-class FilterPage extends StatefulWidget {
+class FilterActivity extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => FilterPageState();
+  State<StatefulWidget> createState() => FilterActivityState();
 }
 
-class FilterPageState extends State<FilterPage> {
+class FilterActivityState extends State<FilterActivity> {
   Filter filter;
 
   _setup() async {

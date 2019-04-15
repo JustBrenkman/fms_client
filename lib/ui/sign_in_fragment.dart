@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:fms_client/fms_models.dart';
+import 'package:fms_client/redux/app_data.dart';
+import 'package:fms_client/redux/fms_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fms_client/server.dart';
+import 'package:fms_client/redux/server.dart';
 
-class SignInPage extends StatefulWidget {
+class SignInFragment extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => SignInPageState();
+  State<StatefulWidget> createState() => SignInFragmentState();
 }
 
-class SignInPageState extends State<SignInPage> {
+class SignInFragmentState extends State<SignInFragment> {
   final _formKey = GlobalKey<FormState>();
   final _serverHost = TextEditingController();
   final _serverPort = TextEditingController();
@@ -293,6 +294,7 @@ class SignInPageState extends State<SignInPage> {
         if (response.success) {
           Fluttertoast.showToast(msg: "Successfully logged you in :)");
           prefs.setString("auth_token", response.authToken);
+          DataCache.getInstance().setPersonRootId(response.personId);
           Navigator.pushNamedAndRemoveUntil(context, "/mymap", (_) => false);
         } else
           Fluttertoast.showToast(msg: response.message);
@@ -308,10 +310,6 @@ class SignInPageState extends State<SignInPage> {
     _serverPort.text = await prefs.get("server_port") ?? "";
     _password.text = prefs.getString("password") ?? "";
     _username.text = prefs.getString("username") ?? "";
-//    if (_username.text.isNotEmpty && _serverHost.text.isNotEmpty && _serverPort.text.isNotEmpty && _password.text.isNotEmpty)
-//        canLogin = true;
-//    else
-//        canLogin = false;
     _disableButton();
   }
 

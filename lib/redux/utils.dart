@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:fms_client/ui/settings_activity.dart';
 
 Color hslToColor(double h, double s, double l) {
   double r, g, b;
@@ -64,6 +65,35 @@ double colorToHue(Color color) {
     h /= 6.0;
   }
 
-//  double[] hsl = {h, s, l};
   return h * 360;
+}
+
+double hueFromEventType(Settings settings, String eventType) {
+  double hue;
+
+  switch (eventType) {
+    case 'baptism':
+      hue = colorToHue(settings.baptismEvent);
+      break;
+    case 'birth':
+      hue = colorToHue(settings.birthEvent);
+      break;
+    case 'marriage':
+      hue = colorToHue(settings.marriageEvent);
+      break;
+    case 'death':
+      hue = colorToHue(settings.deathEvent);
+      break;
+    case 'travel':
+      hue = colorToHue(settings.travelEvent);
+      break;
+    case 'census':
+      hue = colorToHue(settings.censusEvent);
+      break;
+    default:
+      hue = colorToHue(settings.deathEvent);
+      break;
+  }
+
+  return hue;
 }

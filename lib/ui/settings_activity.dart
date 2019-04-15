@@ -3,11 +3,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:fms_client/app_data.dart';
-import 'package:fms_client/server.dart';
+import 'package:fms_client/redux/app_data.dart';
+import 'package:fms_client/redux/server.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:fms_client/utils.dart';
+import 'package:fms_client/redux/utils.dart';
 
 
 class Settings {
@@ -101,20 +101,35 @@ class Settings {
 
 
 
-class SettingPage extends StatefulWidget {
+class SettingActivity extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => SettingPageState();
+  State<StatefulWidget> createState() => SettingActivityState();
 }
 
-class SettingPageState extends State<SettingPage> {
+class SettingActivityState extends State<SettingActivity> with SingleTickerProviderStateMixin {
   String dropDown = 'Red';
   String username = "";
   Settings settings;
+  AnimationController controller;
+  Animation<double> animation;
 
   @override
   void initState() {
-    _setup();
     super.initState();
+    _setup();
+    controller = AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    animation = Tween<double>(begin: 0, end: 2 * pi).animate(controller)
+    ..addListener(() {
+      setState(() {
+
+      });
+    })
+    ..addStatusListener((status) {
+      if (status == AnimationStatus.completed && DataCache.getInstance().loading) {
+        controller.reset();
+        controller.forward();
+      }
+    });
   }
 
 
@@ -175,7 +190,10 @@ class SettingPageState extends State<SettingPage> {
       title: Text("Sync Data"),
       onTap: () {
         DataCache.getInstance().load();
+        controller.reset();
+        controller.forward();
       },
+      trailing: Transform.rotate(child: Icon(Icons.sync), angle: -animation.value,),
     );
   }
 

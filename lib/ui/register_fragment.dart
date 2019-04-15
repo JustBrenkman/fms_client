@@ -2,19 +2,19 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:fms_client/fms_models.dart';
+import 'package:fms_client/redux/fms_models.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterFragment extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => RegisterPageState();
+  State<StatefulWidget> createState() => RegisterFragmentState();
 }
 
 
 enum Gender {male, female}
 
-class RegisterPageState extends State<RegisterPage> {
+class RegisterFragmentState extends State<RegisterFragment> {
 
   final _formKey = GlobalKey<FormState>();
   final _serverHost = TextEditingController();
