@@ -69,7 +69,7 @@ class PersonActivityState extends State<PersonActivity> {
                     return HeaderWithHint(
                       title: "Events",
                       hint: DataCache.getInstance()
-                              .getEventsForPerson(widget.person.person.id)
+                              .getEventsForPerson(widget.person.person.personID)
                               .length
                               .toString() +
                           " items",
@@ -77,7 +77,7 @@ class PersonActivityState extends State<PersonActivity> {
                   },
                   body: Column(
                     children: DataCache.getInstance()
-                        .getEventsForPerson(widget.person.person.id)
+                        .getEventsForPerson(widget.person.person.personID)
                         .map((event) {
                       return EventList(
                         event: event,
@@ -91,11 +91,11 @@ class PersonActivityState extends State<PersonActivity> {
                     headerBuilder: (context, expanded) {
                       return HeaderWithHint(
                         title: "Family",
-                        hint: DataCache.getInstance().getFamily(widget.person.person.id).length.toString() + " items",
+                        hint: DataCache.getInstance().getFamily(widget.person.person.personID).length.toString() + " items",
                       );
                     },
                     body: Column(
-                      children: DataCache.getInstance().getFamily(widget.person.person.id).entries.map((MapEntry<String, PersonComplex> map) {
+                      children: DataCache.getInstance().getFamily(widget.person.person.personID).entries.map((MapEntry<String, PersonComplex> map) {
                         return PersonList(
                           person: map.value,
                           type: map.key,

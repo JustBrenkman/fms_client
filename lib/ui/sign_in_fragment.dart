@@ -14,12 +14,12 @@ class SignInFragmentState extends State<SignInFragment> {
   final _formKey = GlobalKey<FormState>();
   final _serverHost = TextEditingController();
   final _serverPort = TextEditingController();
-  final _username = TextEditingController();
+  final _userName = TextEditingController();
   final _password = TextEditingController();
 
   FocusNode _serverHostFN;
   FocusNode _serverPortFN;
-  FocusNode _usernameFN;
+  FocusNode _userNameFN;
   FocusNode _passwordFN;
 
   bool loading = false;
@@ -29,7 +29,7 @@ class SignInFragmentState extends State<SignInFragment> {
   void initState() {
     _serverHostFN = FocusNode();
     _serverPortFN = FocusNode();
-    _usernameFN = FocusNode();
+    _userNameFN = FocusNode();
     _passwordFN = FocusNode();
 
     setUp();
@@ -41,7 +41,7 @@ class SignInFragmentState extends State<SignInFragment> {
   void dispose() {
     _serverHostFN.dispose();
     _serverPortFN.dispose();
-    _usernameFN.dispose();
+    _userNameFN.dispose();
     _passwordFN.dispose();
     super.dispose();
   }
@@ -61,7 +61,7 @@ class SignInFragmentState extends State<SignInFragment> {
               _serverHostField(),
               _serverPortField(),
               _personalInformation(),
-              _usernameField(),
+              _userNameField(),
               _passwordField(),
               _signinButton(),
               _backButton(),
@@ -152,25 +152,25 @@ class SignInFragmentState extends State<SignInFragment> {
                 borderRadius: BorderRadius.all(Radius.circular(8))),
             hintText: "Server Port"),
         onFieldSubmitted: (focus) =>
-            FocusScope.of(context).requestFocus(_usernameFN),
+            FocusScope.of(context).requestFocus(_userNameFN),
       ),
     );
   }
 
-  Widget _usernameField() {
+  Widget _userNameField() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
         textInputAction: TextInputAction.next,
         enabled: !loading,
-        controller: _username,
-        focusNode: _usernameFN,
+        controller: _userName,
+        focusNode: _userNameFN,
         onEditingComplete: _disableButton,
         decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
             ),
-            hintText: "Username"),
+            hintText: "userName"),
         validator: (value) {
           if (value.isEmpty) return 'Not good';
         },
@@ -279,13 +279,13 @@ class SignInFragmentState extends State<SignInFragment> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString("server_host", _serverHost.text);
     await prefs.setString("server_port", _serverPort.text);
-    await prefs.setString("username", _username.text);
+    await prefs.setString("userName", _userName.text);
     await prefs.setString("password", _password.text);
     setState(() {
       loading = true;
     });
     LoginRequest loginRequest = LoginRequest(
-      username: _username.text,
+      userName: _userName.text,
       password: _password.text,
     );
     ServerProxy serverProxy = await ServerProxy.getInstance();
@@ -294,7 +294,7 @@ class SignInFragmentState extends State<SignInFragment> {
         if (response.success) {
           Fluttertoast.showToast(msg: "Successfully logged you in :)");
           prefs.setString("auth_token", response.authToken);
-          DataCache.getInstance().setPersonRootId(response.personId);
+          DataCache.getInstance().setPersonRootId(response.personID);
           Navigator.pushNamedAndRemoveUntil(context, "/mymap", (_) => false);
         } else
           Fluttertoast.showToast(msg: response.message);
@@ -309,12 +309,12 @@ class SignInFragmentState extends State<SignInFragment> {
     _serverHost.text = prefs.getString("server_host") ?? "";
     _serverPort.text = await prefs.get("server_port") ?? "";
     _password.text = prefs.getString("password") ?? "";
-    _username.text = prefs.getString("username") ?? "";
+    _userName.text = prefs.getString("userName") ?? "";
     _disableButton();
   }
 
   void _disableButton() {
-    if (_username.text.isNotEmpty && _serverHost.text.isNotEmpty && _serverPort.text.isNotEmpty && _password.text.isNotEmpty)
+    if (_userName.text.isNotEmpty && _serverHost.text.isNotEmpty && _serverPort.text.isNotEmpty && _password.text.isNotEmpty)
       setState(() {
         canLogin = true;
       });

@@ -72,7 +72,7 @@ class SearchActivityState extends State<SearchActivity> {
           events.map((event) {
             return EventList(
               event: event,
-              person: DataCache.getInstance().familyTree[event.personId],
+              person: DataCache.getInstance().familyTree[event.personID],
             );
           }).toList()
         ].expand((x) => x).toList(),

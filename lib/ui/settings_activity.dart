@@ -108,7 +108,7 @@ class SettingActivity extends StatefulWidget {
 
 class SettingActivityState extends State<SettingActivity> with SingleTickerProviderStateMixin {
   String dropDown = 'Red';
-  String username = "";
+  String userName = "";
   Settings settings;
   AnimationController controller;
   Animation<double> animation;
@@ -189,6 +189,7 @@ class SettingActivityState extends State<SettingActivity> with SingleTickerProvi
     return ListTile(
       title: Text("Sync Data"),
       onTap: () {
+        DataCache.getInstance().setTempFinish(() => Navigator.of(context).pop());
         DataCache.getInstance().load();
         controller.reset();
         controller.forward();
@@ -411,10 +412,10 @@ class SettingActivityState extends State<SettingActivity> with SingleTickerProvi
   }
 
   _setup() async {
-    username = await getUserName();
+    userName = await getuserName();
     settings = Settings.getInstance();
     setState(() {
-      username = username;
+      userName = userName;
     });
     setState(() {
       settings = settings;
@@ -424,7 +425,7 @@ class SettingActivityState extends State<SettingActivity> with SingleTickerProvi
   Widget _logout() {
     return ListTile(
       onTap: () => Navigator.pushNamedAndRemoveUntil(context, "/", (_) => false),
-      title: Text("Logout: " + username),
+      title: Text("Logout: " + userName),
     );
   }
 

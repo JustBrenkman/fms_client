@@ -50,7 +50,7 @@ class MapFragmentState extends State<MapFragment> {
     type = settings.mapType;
     _selectedEvent = widget.event;
     super.initState();
-    onFragmentCreated(MapFragmentController(_triggerMarkerUpload, _reset));
+    onFragmentCreated(MapFragmentController(_triggerMarkerUpload, _reset, _updatemapType));
   }
 
   @override
@@ -74,16 +74,24 @@ class MapFragmentState extends State<MapFragment> {
   }
 
   void _reset() {
-    _selectedPerson = null;
-    _selectedEvent = null;
-    _selectedMarker = null;
+    setState(() {
+      _selectedPerson = null;
+      _selectedEvent = null;
+      _selectedMarker = null;
+    });
+  }
+
+  void _updatemapType() {
+    setState(() {
+      type = settings.mapType;
+    });
   }
 
   Widget _bottomSheet() {
     return GestureDetector(
       onTap: _selectedPerson == null ? null : () {
         Navigator.push(context, new MaterialPageRoute(
-            builder: (context) => PersonActivity(person: dataCache.familyTree[_selectedPerson.id],)
+            builder: (context) => PersonActivity(person: dataCache.familyTree[_selectedPerson.personID],)
         ));
       },
       child: SizedBox(
@@ -168,7 +176,7 @@ class MapFragmentState extends State<MapFragment> {
     setState(() {
       _selectedMarker = marker;
       _selectedEvent = eventMarkers[marker];
-      _selectedPerson = dataCache.getPersonData(_selectedEvent.personId);
+      _selectedPerson = dataCache.getPersonData(_selectedEvent.personID);
     });
     _processPolyLines();
   }
@@ -176,7 +184,7 @@ class MapFragmentState extends State<MapFragment> {
   void _selectEvent(Event event) {
     setState(() {
       _selectedEvent = event;
-      _selectedPerson = dataCache.getPersonData(_selectedEvent.personId);
+      _selectedPerson = dataCache.getPersonData(_selectedEvent.personID);
       _controller.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(target: LatLng(event.latitude, event.longitude), zoom: 14)
       ));
@@ -190,6 +198,10 @@ class MapFragmentState extends State<MapFragment> {
     if (widget.event != null) {
       _selectEvent(widget.event);
     }
+    _controller.onMapTapped.add((latlng) {
+      _controller.clearPolylines();
+      _reset();
+    });
   }
 
   void _triggerMarkerUpload() {
@@ -237,7 +249,7 @@ class MapFragmentState extends State<MapFragment> {
         });
       }
       if (settings.familyTreeLinesView) {
-        addParentLinesR(dataCache.getPersonComplexData(_selectedEvent.personId), 30, event: _selectedEvent);
+        addParentLinesR(dataCache.getPersonComplexData(_selectedEvent.personID), 30, event: _selectedEvent);
       }
     }
   }
@@ -265,12 +277,12 @@ class MapFragmentState extends State<MapFragment> {
     if (lineWidth < 0)
       lineWidth = 1;
 
-    PersonComplex temp = dataCache.getPersonComplexData(person.person.id);
+    PersonComplex temp = dataCache.getPersonComplexData(person.person.personID);
     if (temp == null)
       return;
     PersonComplex father = temp.father;
 
-    temp = dataCache.getPersonComplexData(person.person.id);
+    temp = dataCache.getPersonComplexData(person.person.personID);
     if (temp == null)
       return;
     PersonComplex mother = temp.mother;
@@ -298,8 +310,9 @@ class MapFragmentState extends State<MapFragment> {
 class MapFragmentController {
   VoidCallback _triggerMarkerUpload;
   VoidCallback _reset;
+  VoidCallback _updateType;
 
-  MapFragmentController(this._triggerMarkerUpload, this._reset);
+  MapFragmentController(this._triggerMarkerUpload, this._reset, this._updateType);
 
   void triggerMarkerUpload() {
     _triggerMarkerUpload();
@@ -307,5 +320,9 @@ class MapFragmentController {
 
   void triggerReset() {
     _reset();
+  }
+
+  void updateMapType() {
+    _updateType();
   }
 }

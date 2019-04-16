@@ -17,6 +17,7 @@ class DataCache {
   VoidCallback onStartSync;
   VoidCallback onFinishedSync;
   VoidCallback onSyncChange;
+  VoidCallback tempFinish;
   String rootId;
 
   static DataCache _instance;
@@ -45,6 +46,10 @@ class DataCache {
     onSyncChange = onChange;
   }
 
+  void setTempFinish(VoidCallback callback) {
+    tempFinish = callback;
+  }
+
   void load() async {
     loading = true;
     if (onStartSync != null)
@@ -60,22 +65,24 @@ class DataCache {
     if (personsResponse.success)
       people = personsResponse.data;
 
-    people.forEach((person) => peopleMap[person.id] = person);
+    people.forEach((person) => peopleMap[person.personID] = person);
     loading = false;
 
     personEventMap.clear();
     familyTree = Map();
 
     events.forEach((event) {
-      if (!personEventMap.containsKey(event.personId))
-        personEventMap[event.personId] = new List();
-      personEventMap[event.personId].add(event);
+      if (!personEventMap.containsKey(event.personID))
+        personEventMap[event.personID] = new List();
+      personEventMap[event.personID].add(event);
     });
 
     _createFamilyTree();
 
     if (onFinishedSync != null)
       onFinishedSync();
+    if (tempFinish != null)
+      tempFinish();
   }
 
   Person getPersonData(String id) {
@@ -92,11 +99,11 @@ class DataCache {
 
   void _createFamilyTree() {
     familyTree[rootId] = PersonComplex(this, peopleMap[rootId]);
-    familyTree[familyTree[rootId].person.spouseID] = PersonComplex(this, peopleMap[familyTree[rootId].person.spouseID]);
+    familyTree[familyTree[rootId].person.spouse] = PersonComplex(this, peopleMap[familyTree[rootId].person.spouse]);
   }
 
   bool shouldDisplayEventMarker(Event event) {
-    Person person = getPersonData(event.personId);
+    Person person = getPersonData(event.personID);
 
     bool birth = (event.eventType == "birth" && filter.birthEvents);
     bool baptism = (event.eventType == "baptism" && filter.baptismEvents);
@@ -108,15 +115,15 @@ class DataCache {
     bool male = (person.gender == 'm' && filter.maleEvents);
     bool female = (person.gender == 'f' && filter.femaleEvents);
 
-    bool parents = isFatherSide(familyTree[event.personId]);
+    bool parents = isFatherSide(familyTree[event.personID]);
     bool motherrsSide = (filter.mothersEvents && !parents);
     bool fathersSide = (filter.fathersEvents && parents);
 
     return birth || baptism || census || christening || death || marriage || travel || male || female || motherrsSide || fathersSide;
   }
 
-  void setPersonRootId(String personId) {
-    this.rootId = personId;
+  void setPersonRootId(String personID) {
+    this.rootId = personID;
   }
 
   Map<String, PersonComplex> getFamily(String id) {
@@ -172,29 +179,31 @@ class DataCache {
 
   Event getSpouseEvent(Event selectedEvent) {
     PersonComplex person = familyTree.containsKey(selectedEvent.
-personId) ? familyTree[selectedEvent.personId] : null;
+personID) ? familyTree[selectedEvent.personID] : null;
     PersonComplex spouse = person.spouse;
-    List<Event> events = getEventsForPerson(spouse.person.id);
     Event event;
-    events.sort((a, b) => a.year.compareTo(b.year));
-    for (final item in events) {
-      if (shouldDisplayEventMarker(item)) {
-        event = item;
-        break;
+    if (spouse != null) {
+      List<Event> events = getEventsForPerson(spouse.person.personID);
+      events.sort((a, b) => a.year.compareTo(b.year));
+      for (final item in events) {
+        if (shouldDisplayEventMarker(item)) {
+          event = item;
+          break;
+        }
       }
     }
     return event;
   }
 
   List<Event> getLifeStoryEvents(Event selected) {
-    List<Event> list = getEventsForPerson(selected.personId);
+    List<Event> list = getEventsForPerson(selected.personID);
     list.sort((a, b) => a.year.compareTo(b.year));
     list.removeWhere((event) => !shouldDisplayEventMarker(event));
     return list;
   }
 
-  PersonComplex getPersonComplexData(String personId) {
-    return familyTree.containsKey(personId) ? familyTree[personId] : null;
+  PersonComplex getPersonComplexData(String personID) {
+    return familyTree.containsKey(personID) ? familyTree[personID] : null;
   }
 
   Event getEarliestEvent(PersonComplex person) {
@@ -202,7 +211,7 @@ personId) ? familyTree[selectedEvent.personId] : null;
       return null;
     if (person.person == null)
       return null;
-    List<Event> events = getEventsForPerson(person.person.id);
+    List<Event> events = getEventsForPerson(person.person.personID);
     Event event;
     events.sort((a, b) => a.year.compareTo(b.year));
     for (final item in events) {
@@ -224,24 +233,24 @@ class PersonComplex {
 
   /// Creates a Complex person that is linked to all its descendants
   PersonComplex(DataCache dataCache, Person person) {
-    if (person.fatherID != null) {
-      if (!dataCache.familyTree.containsKey(person.fatherID)) {
-        this.father = PersonComplex(dataCache, dataCache.getPersonData(person.fatherID));
-        dataCache.familyTree[person.fatherID] = this.father;
+    if (person.father != null) {
+      if (!dataCache.familyTree.containsKey(person.father)) {
+        this.father = PersonComplex(dataCache, dataCache.getPersonData(person.father));
+        dataCache.familyTree[person.father] = this.father;
       } else
-        this.father = dataCache.familyTree[person.fatherID];
+        this.father = dataCache.familyTree[person.father];
 
-      dataCache.familyTree[person.fatherID].child = this;
+      dataCache.familyTree[person.father].child = this;
     }
 
-    if (person.motherID != null) {
-      if (!dataCache.familyTree.containsKey(person.motherID)) {
-        this.mother = PersonComplex(dataCache, dataCache.getPersonData(person.motherID));
-        dataCache.familyTree[person.motherID] = this.mother;
+    if (person.mother != null) {
+      if (!dataCache.familyTree.containsKey(person.mother)) {
+        this.mother = PersonComplex(dataCache, dataCache.getPersonData(person.mother));
+        dataCache.familyTree[person.mother] = this.mother;
       } else
-        this.mother = dataCache.familyTree[person.motherID];
+        this.mother = dataCache.familyTree[person.mother];
 
-      dataCache.familyTree[person.motherID].child = this;
+      dataCache.familyTree[person.mother].child = this;
     }
 
     if (this.mother != null || this.father != null) {

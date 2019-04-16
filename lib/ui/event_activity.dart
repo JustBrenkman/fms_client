@@ -20,6 +20,7 @@ class EventActivityState extends State<EventActivity> {
     return WillPopScope(
       onWillPop: _backPressed,
       child: Scaffold(
+        resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           title: Text("Family map"),
         ),

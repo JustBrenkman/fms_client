@@ -17,7 +17,7 @@ Map<String, dynamic> parseJwt(String token) {
   return payloadMap;
 }
 
-Future<String> getUserName() async {
+Future<String> getuserName() async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   String jwt = preferences.getString("auth_token") ?? "";
   return parseJwt(jwt)['sub'];

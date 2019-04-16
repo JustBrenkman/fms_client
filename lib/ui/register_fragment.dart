@@ -19,7 +19,7 @@ class RegisterFragmentState extends State<RegisterFragment> {
   final _formKey = GlobalKey<FormState>();
   final _serverHost = TextEditingController();
   final _serverPort = TextEditingController();
-  final _username = TextEditingController();
+  final _userName = TextEditingController();
   final _password = TextEditingController();
   final _firstName = TextEditingController();
   final _lastName = TextEditingController();
@@ -27,7 +27,7 @@ class RegisterFragmentState extends State<RegisterFragment> {
 
   FocusNode _serverHostFN;
   FocusNode _serverPortFN;
-  FocusNode _usernameFN;
+  FocusNode _userNameFN;
   FocusNode _passwordFN;
   FocusNode _firstNameFN;
   FocusNode _lastNameFN;
@@ -41,7 +41,7 @@ class RegisterFragmentState extends State<RegisterFragment> {
   void initState() {
     _serverHostFN = FocusNode();
     _serverPortFN = FocusNode();
-    _usernameFN = FocusNode();
+    _userNameFN = FocusNode();
     _passwordFN = FocusNode();
     _firstNameFN = FocusNode();
     _lastNameFN = FocusNode();
@@ -54,7 +54,7 @@ class RegisterFragmentState extends State<RegisterFragment> {
   void dispose() {
     _serverHostFN.dispose();
     _serverPortFN.dispose();
-    _usernameFN.dispose();
+    _userNameFN.dispose();
     _passwordFN.dispose();
     _firstNameFN.dispose();
     _lastNameFN.dispose();
@@ -76,7 +76,7 @@ class RegisterFragmentState extends State<RegisterFragment> {
               _serverHostField(),
               _serverPortField(),
               _personalInformation(),
-              _usernameField(),
+              _userNameField(),
               _passwordField(),
               _firstNameField(),
               _lastNameField(),
@@ -161,25 +161,25 @@ class RegisterFragmentState extends State<RegisterFragment> {
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8))),
             hintText: "Server Port"),
-        onFieldSubmitted: (focus) => FocusScope.of(context).requestFocus(_usernameFN),
+        onFieldSubmitted: (focus) => FocusScope.of(context).requestFocus(_userNameFN),
       ),
     );
   }
 
-  Widget _usernameField() {
+  Widget _userNameField() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
         textInputAction: TextInputAction.next,
         enabled: !loading,
-        controller: _username,
-        focusNode: _usernameFN,
+        controller: _userName,
+        focusNode: _userNameFN,
         onEditingComplete: _disableButton,
         decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
             ),
-            hintText: "Username"
+            hintText: "userName"
         ),
         validator: (value) {
           if (value.isEmpty)
@@ -404,11 +404,11 @@ class RegisterFragmentState extends State<RegisterFragment> {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString("server_port", _serverPort.text);
     prefs.setString("server_host", _serverHost.text);
-    prefs.setString("username", _username.text);
+    prefs.setString("userName", _userName.text);
     prefs.setString("password", _password.text);
     loading = true;
     RegisterRequest registerRequest = RegisterRequest(
-        username: _username.text,
+        userName: _userName.text,
         password: _password.text,
         email: _email.text,
         firstName: _firstName.text,
@@ -434,12 +434,12 @@ class RegisterFragmentState extends State<RegisterFragment> {
     _serverHost.text = prefs.getString("server_host") ?? "";
     _serverPort.text = prefs.get("server_port") ?? "";
     _password.text = prefs.getString("password") ?? "";
-    _username.text = prefs.getString("username") ?? "";
+    _userName.text = prefs.getString("userName") ?? "";
     _disableButton();
   }
 
   void _disableButton() {
-    if (_username.text.isNotEmpty && _serverHost.text.isNotEmpty && _serverPort.text.isNotEmpty && _password.text.isNotEmpty && _email.text.isNotEmpty && _firstName.text.isNotEmpty && _lastName.text.isNotEmpty)
+    if (_userName.text.isNotEmpty && _serverHost.text.isNotEmpty && _serverPort.text.isNotEmpty && _password.text.isNotEmpty && _email.text.isNotEmpty && _firstName.text.isNotEmpty && _lastName.text.isNotEmpty)
       setState(() {
         canLogin = true;
       });

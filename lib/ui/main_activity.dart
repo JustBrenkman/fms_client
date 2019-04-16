@@ -5,6 +5,7 @@ import 'package:fms_client/ui/filter_activity.dart';
 import 'package:fms_client/ui/settings_activity.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'map_fragment.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class MainActivity extends StatefulWidget {
   @override
@@ -26,6 +27,7 @@ class MainActivityState extends State<MainActivity> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Text("My Family Map"),
         actions: <Widget>[
@@ -46,9 +48,9 @@ class MainActivityState extends State<MainActivity> {
               icon: Icon(Icons.settings),
               onPressed: dataCacheSync ? null : () async {
                 await Navigator.pushNamed(context, "/settings");
-                setState(() {
-                  type = settings.mapType;
-                });
+//                setState(() {
+                _mapFragmentController.updateMapType();
+//                });
                 _mapFragmentController.triggerMarkerUpload();
               }),
         ],
@@ -72,6 +74,7 @@ class MainActivityState extends State<MainActivity> {
     dataCache.setOnFinishedSync(() {
       setState(() {
         dataCacheSync = false;
+        _showToast("Finished syncing");
         if (_mapFragmentController != null)
           _mapFragmentController.triggerMarkerUpload();
       });
@@ -82,5 +85,9 @@ class MainActivityState extends State<MainActivity> {
 
   void _onMapFragmentCreated(MapFragmentController fragmentController) {
     _mapFragmentController = fragmentController;
+  }
+
+  void _showToast(String message) {
+    Fluttertoast.showToast(msg: message);
   }
 }
