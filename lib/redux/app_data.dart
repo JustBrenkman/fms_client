@@ -1,5 +1,8 @@
-import 'package:fms_client/ui/filter_activity.dart';
+import 'package:fms_client/activities/filter_activity.dart';
 import 'package:flutter/material.dart';
+import 'package:fms_client/redux/utils.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fms_models.dart';
 import 'server.dart';
@@ -65,6 +68,15 @@ class DataCache {
     if (personsResponse.success)
       people = personsResponse.data;
 
+    processData();
+
+    if (onFinishedSync != null)
+      onFinishedSync();
+    if (tempFinish != null)
+      tempFinish();
+  }
+
+  void processData() {
     people.forEach((person) => peopleMap[person.personID] = person);
     loading = false;
 
@@ -78,11 +90,6 @@ class DataCache {
     });
 
     _createFamilyTree();
-
-    if (onFinishedSync != null)
-      onFinishedSync();
-    if (tempFinish != null)
-      tempFinish();
   }
 
   Person getPersonData(String id) {
@@ -99,7 +106,10 @@ class DataCache {
 
   void _createFamilyTree() {
     familyTree[rootId] = PersonComplex(this, peopleMap[rootId]);
-    familyTree[familyTree[rootId].person.spouse] = PersonComplex(this, peopleMap[familyTree[rootId].person.spouse]);
+    PersonComplex spouse = PersonComplex(this, peopleMap[familyTree[rootId].person.spouse]);
+    familyTree[familyTree[rootId].person.spouse] = spouse;
+    familyTree[rootId].spouse = spouse;
+    spouse.spouse = familyTree[rootId];
   }
 
   bool shouldDisplayEventMarker(Event event) {
@@ -119,7 +129,7 @@ class DataCache {
     bool motherrsSide = (filter.mothersEvents && !parents);
     bool fathersSide = (filter.fathersEvents && parents);
 
-    return birth || baptism || census || christening || death || marriage || travel || male || female || motherrsSide || fathersSide;
+    return (birth || baptism || census || christening || death || marriage || travel) && (male || female) && (motherrsSide || fathersSide);
   }
 
   void setPersonRootId(String personID) {
@@ -145,9 +155,9 @@ class DataCache {
   List<Event> searchEvents(String keyword) {
     List<Event> eventsFound = List();
     events.forEach((event) {
-      if (event.country.toLowerCase().contains(keyword.toLowerCase()) || event.city.toLowerCase().contains(keyword.toLowerCase()) ||
+      if ((event.country.toLowerCase().contains(keyword.toLowerCase()) || event.city.toLowerCase().contains(keyword.toLowerCase()) ||
           event.eventType.toLowerCase().contains(keyword.toLowerCase()) ||
-          event.year.toString().contains(keyword.toLowerCase()))
+          event.year.toString().contains(keyword.toLowerCase())) && shouldDisplayEventMarker(event))
         eventsFound.add(event);
     });
     return eventsFound;
@@ -279,7 +289,7 @@ class PlatformBridge {
     _callback_channel.setMethodCallHandler((methodCall) async {
       String method = methodCall.method;
       switch (method) {
-        case 'hello':
+        case 'register':
           return;
           break;
       }
@@ -289,13 +299,150 @@ class PlatformBridge {
 
   static Future<void> runTest() async {
     try {
-//      final String message = await _platform.invokeMethod("getString");
-//      print("Message: " + message);
       final int testInt = await _platform.invokeMethod("getInt");
       print("Int: " + testInt.toString());
-//      final List<String> messages = await _platform.invokeMethod("getStringList");
     } on PlatformException catch(e) {
       print("failed");
     }
+  }
+}
+
+class Settings {
+  Color lifeStoryLines = Color.fromRGBO(0, 255, 0, 1);
+  Color familyTreeLines = Color.fromRGBO(0, 0, 255, 1);
+  Color spouseLines = Color.fromRGBO(255, 0, 0, 1);
+
+  Color baptismEvent = hslToColor(BitmapDescriptor.hueCyan, 1, 0.5);
+  Color birthEvent = hslToColor(BitmapDescriptor.hueOrange, 1, 0.5);
+  Color censusEvent = hslToColor(BitmapDescriptor.hueRose, 1, 0.5);
+  Color christeningEvent = hslToColor(BitmapDescriptor.hueYellow, 1, 0.5);
+  Color marriageEvent = hslToColor(BitmapDescriptor.hueAzure, 1, 0.5);
+  Color travelEvent =  hslToColor(BitmapDescriptor.hueMagenta, 1, 0.5);
+  Color deathEvent =hslToColor(BitmapDescriptor.hueViolet, 1, 0.5);
+
+  bool lifeStoryLinesView = true;
+  bool familyTreeLinesView = true;
+  bool spouseLinesView = true;
+
+  MapType mapType = MapType.normal;
+
+  void setDefault() {
+    lifeStoryLines = Color.fromRGBO(0, 255, 0, 1);
+    familyTreeLines = Color.fromRGBO(0, 0, 255, 1);
+    spouseLines = Color.fromRGBO(255, 0, 0, 1);
+
+    baptismEvent = hslToColor(BitmapDescriptor.hueCyan, 1, 0.5);
+    birthEvent = hslToColor(BitmapDescriptor.hueOrange, 1, 0.5);
+    censusEvent = hslToColor(BitmapDescriptor.hueRose, 1, 0.5);
+    christeningEvent = hslToColor(BitmapDescriptor.hueYellow, 1, 0.5);
+    marriageEvent = hslToColor(BitmapDescriptor.hueAzure, 1, 0.5);
+    travelEvent =  hslToColor(BitmapDescriptor.hueMagenta, 1, 0.5);
+    deathEvent =hslToColor(BitmapDescriptor.hueViolet, 1, 0.5);
+
+    lifeStoryLinesView = true;
+    familyTreeLinesView = true;
+    spouseLinesView = true;
+  }
+
+  void _load() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    lifeStoryLinesView = preferences.getBool("lifeStoryLinesView") ?? true;
+    familyTreeLinesView = preferences.getBool("familyTreeLinesView") ?? true;
+    spouseLinesView = preferences.getBool("spouseLinesView") ?? true;
+
+    lifeStoryLines = Color(preferences.getInt("lifeStoryLines") ?? Color.fromRGBO(0, 255, 0, 1).value);
+    familyTreeLines = Color(preferences.getInt("familyTreeLines") ?? Color.fromRGBO(0, 0, 255, 1).value);
+    spouseLines = Color(preferences.getInt("spouseLines") ?? Color.fromRGBO(255, 0, 0, 1).value);
+
+    birthEvent = Color(preferences.getInt("birthEvent")) ?? hslToColor(BitmapDescriptor.hueBlue, 1, 0.5);
+    baptismEvent = Color(preferences.getInt("baptismEvent")) ?? hslToColor(BitmapDescriptor.hueCyan, 1, 0.5);
+    censusEvent = Color(preferences.getInt("censusEvent")) ?? hslToColor(BitmapDescriptor.hueRose, 1, 0.5);
+    christeningEvent = Color(preferences.getInt("christeningEvent")) ?? hslToColor(BitmapDescriptor.hueYellow, 1, 0.5);
+    marriageEvent = Color(preferences.getInt("marriageEvent")) ?? hslToColor(BitmapDescriptor.hueAzure, 1, 0.5);
+    travelEvent = Color(preferences.getInt("travelEvent")) ?? hslToColor(BitmapDescriptor.hueMagenta, 1, 0.5);
+    deathEvent = Color(preferences.getInt("deathEvent")) ?? hslToColor(BitmapDescriptor.hueViolet, 1, 0.5);
+
+    mapType = MapType.values[preferences.getInt("mapType") ?? MapType.normal.index];
+  }
+
+  void save() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setBool("lifeStoryLinesView", lifeStoryLinesView);
+    preferences.setBool("familyTreeLinesView", familyTreeLinesView);
+    preferences.setBool("spouseLinesView", spouseLinesView);
+
+    preferences.setInt("lifeStoryLines", lifeStoryLines.value);
+    preferences.setInt("familyTreeLines", familyTreeLines.value);
+    preferences.setInt("spouseLines", spouseLines.value);
+
+    preferences.setInt("baptismEvent", baptismEvent.value);
+    preferences.setInt("birthEvent", birthEvent.value);
+    preferences.setInt("censusEvent", censusEvent.value);
+    preferences.setInt("christeningEvent", christeningEvent.value);
+    preferences.setInt("marriageEvent", marriageEvent.value);
+    preferences.setInt("travelEvent", travelEvent.value);
+    preferences.setInt("deathEvent", deathEvent.value);
+    preferences.setInt("mapType", mapType.index);
+  }
+
+  static Settings _instance;
+
+  static Settings getInstance() {
+    if (_instance == null) {
+      _instance = Settings();
+      _instance._load();
+    }
+    return _instance;
+  }
+}
+
+class Filter {
+  bool baptismEvents = true;
+  bool birthEvents = true;
+  bool censusEvents = true;
+  bool christeningEvents = true;
+  bool deathEvents = true;
+  bool marriageEvents = true;
+  bool fathersEvents = true;
+  bool mothersEvents = true;
+  bool maleEvents = true;
+  bool femaleEvents = true;
+  bool travelEvents = true;
+
+  static Filter _instance;
+
+  void _load() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    baptismEvents = preferences.getBool("baptismEvents") ?? true;
+    birthEvents = preferences.getBool("birthEvents") ?? true;
+    censusEvents = preferences.getBool("censusEvents") ?? true;
+    christeningEvents = preferences.getBool("christeningEvents") ?? true;
+    deathEvents = preferences.getBool("deathEvents") ?? true;
+    travelEvents = preferences.getBool("travelEvents") ?? true;
+    fathersEvents = preferences.getBool("fathersEvents") ?? true;
+    mothersEvents = preferences.getBool("mothersEvents") ?? true;
+    maleEvents = preferences.getBool("maleEvents") ?? true;
+    femaleEvents = preferences.getBool("femaleEvents") ?? true;
+  }
+  void save() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setBool("baptismEvents", baptismEvents);
+    preferences.setBool("birthEvents", birthEvents);
+    preferences.setBool("censusEvents", censusEvents);
+    preferences.setBool("christeningEvents", christeningEvents);
+    preferences.setBool("deathEvents", deathEvents);
+    preferences.setBool("travelEvents", travelEvents);
+    preferences.setBool("fathersEvents", fathersEvents);
+    preferences.setBool("mothersEvents", mothersEvents);
+    preferences.setBool("maleEvents", maleEvents);
+    preferences.setBool("femaleEvents", femaleEvents);
+  }
+
+  static Filter getInstance() {
+    if (_instance == null) {
+      _instance = Filter();
+      _instance._load();
+    }
+    return _instance;
   }
 }

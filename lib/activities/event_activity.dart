@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fms_client/redux/fms_models.dart';
-import 'map_fragment.dart';
+import 'package:fms_client/fragments/map_fragment.dart';
 
 class EventActivity extends StatefulWidget {
   final Event event;
@@ -24,7 +24,7 @@ class EventActivityState extends State<EventActivity> {
         appBar: AppBar(
           title: Text("Family map"),
         ),
-        body: MapFragment(shouldFilter: false, onFragmentCreated: _onMapFragmentCreated, event: widget.event,),
+        body: MapFragment(shouldFilter: true, onFragmentCreated: _onMapFragmentCreated, event: widget.event,),
       ),
     );
   }

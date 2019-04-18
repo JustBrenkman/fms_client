@@ -195,7 +195,7 @@ class SignInFragmentState extends State<SignInFragment> {
         },
         validator: (value) {
           if (value.isEmpty) return "Please enter a password";
-          if (value.length < 8) return "Password must be 8 or more characters";
+//          if (value.length < 8) return "Password must be 8 or more characters";
         },
         decoration: InputDecoration(
             border: OutlineInputBorder(

@@ -7,7 +7,6 @@ Map<String, dynamic> parseJwt(String token) {
   if (parts.length != 3) {
     throw Exception('invalid token');
   }
-
   final payload = _decodeBase64(parts[1]);
   final payloadMap = json.decode(payload);
   if (payloadMap is! Map<String, dynamic>) {
@@ -68,9 +67,6 @@ class ServerProxy {
     Map<String, dynamic> returnVal;
     try {
       await http.post("http://" + serverHost + ":" + serverPort + url, body: body.toString()).then((response) {returnVal = jsonDecode(response.body);});
-//          .catchError(() {
-//        returnVal = {'success': false, 'message': 'Sever internal error, try again later'};
-//      });
     } catch (SocketException) {
       returnVal = {'success': false, 'message': 'Sever error, could not connect'};
     }
@@ -95,9 +91,6 @@ class ServerProxy {
     Map<String, dynamic> returnVal;
     try {
       await http.post("http://" + serverHost + ":" + serverPort + url, body: body.toString(), headers: {'auth_token': auth_token}).then((response) {returnVal = jsonDecode(response.body);});
-//      .catchError(() {
-//        returnVal = {'success': false, 'message': 'Sever error, could not connect'};
-//      });
     } catch (SocketException) {
       returnVal = {'success': false, 'message': 'Sever error, could not connect'};
     }

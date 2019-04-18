@@ -419,9 +419,11 @@ class RegisterFragmentState extends State<RegisterFragment> {
     http.post("http://" + _serverHost.text + ":" + _serverPort.text + "/user/register", body: registerRequest.toJson().toString()).then(
             (result) {
               LoginResponse response = LoginResponse.fromJson(jsonDecode(result.body));
-              if (response.success)
+              if (response.success) {
                 Fluttertoast.showToast(msg: "Successfully registered you :)");
-              else {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, "/mymap", (_) => false);
+              } else {
                 Fluttertoast.showToast(msg: response.message);
               }
               loading = false;

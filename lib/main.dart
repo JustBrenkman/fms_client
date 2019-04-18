@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fms_client/redux/app_data.dart';
-import 'package:fms_client/ui/filter_activity.dart';
-import 'package:fms_client/ui/main_activity.dart';
-import 'package:fms_client/ui/search_activity.dart';
-import 'package:fms_client/ui/settings_activity.dart';
-import 'package:fms_client/ui/sign_in_fragment.dart';
-import 'package:fms_client/ui/register_fragment.dart';
+import 'package:fms_client/activities/filter_activity.dart';
+import 'package:fms_client/activities/main_activity.dart';
+import 'package:fms_client/activities/search_activity.dart';
+import 'package:fms_client/activities/settings_activity.dart';
+import 'package:fms_client/fragments/sign_in_fragment.dart';
+import 'package:fms_client/fragments/register_fragment.dart';
 
 void main() {
   Filter.getInstance();

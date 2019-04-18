@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:fms_client/ui/settings_activity.dart';
+import 'package:fms_client/redux/app_data.dart';
 
 Color hslToColor(double h, double s, double l) {
   double r, g, b;

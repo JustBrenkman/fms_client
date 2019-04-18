@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fms_client/redux/app_data.dart';
 import 'package:fms_client/redux/fms_models.dart';
-import 'package:fms_client/ui/event_activity.dart';
-import 'package:fms_client/ui/person_activity.dart';
+import 'package:fms_client/activities/event_activity.dart';
+import 'package:fms_client/activities/person_activity.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PersonList extends StatelessWidget {

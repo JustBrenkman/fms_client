@@ -1,56 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fms_client/redux/app_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class Filter {
-  bool baptismEvents = true;
-  bool birthEvents = true;
-  bool censusEvents = true;
-  bool christeningEvents = true;
-  bool deathEvents = true;
-  bool marriageEvents = true;
-  bool fathersEvents = true;
-  bool mothersEvents = true;
-  bool maleEvents = true;
-  bool femaleEvents = true;
-  bool travelEvents = true;
-
-  static Filter _instance;
-
-  void _load() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    baptismEvents = preferences.getBool("baptismEvents") ?? true;
-    birthEvents = preferences.getBool("birthEvents") ?? true;
-    censusEvents = preferences.getBool("censusEvents") ?? true;
-    christeningEvents = preferences.getBool("christeningEvents") ?? true;
-    deathEvents = preferences.getBool("deathEvents") ?? true;
-    travelEvents = preferences.getBool("travelEvents") ?? true;
-    fathersEvents = preferences.getBool("fathersEvents") ?? true;
-    mothersEvents = preferences.getBool("mothersEvents") ?? true;
-    maleEvents = preferences.getBool("maleEvents") ?? true;
-    femaleEvents = preferences.getBool("femaleEvents") ?? true;
-  }
-  void _save() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setBool("baptismEvents", baptismEvents);
-    preferences.setBool("birthEvents", birthEvents);
-    preferences.setBool("censusEvents", censusEvents);
-    preferences.setBool("christeningEvents", christeningEvents);
-    preferences.setBool("deathEvents", deathEvents);
-    preferences.setBool("travelEvents", travelEvents);
-    preferences.setBool("fathersEvents", fathersEvents);
-    preferences.setBool("mothersEvents", mothersEvents);
-    preferences.setBool("maleEvents", maleEvents);
-    preferences.setBool("femaleEvents", femaleEvents);
-  }
-
-  static Filter getInstance() {
-    if (_instance == null) {
-      _instance = Filter();
-      _instance._load();
-    }
-    return _instance;
-  }
-}
 
 class FilterActivity extends StatefulWidget {
   @override
@@ -61,7 +11,7 @@ class FilterActivityState extends State<FilterActivity> {
   Filter filter;
 
   _setup() async {
-    filter = await Filter.getInstance();
+    filter = Filter.getInstance();
     setState(() {
       filter = filter;
     });
@@ -75,7 +25,7 @@ class FilterActivityState extends State<FilterActivity> {
 
   @override
   void dispose() {
-    filter._save();
+    filter.save();
     super.dispose();
   }
 

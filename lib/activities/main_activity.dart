@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fms_client/redux/app_data.dart';
 import 'package:fms_client/redux/fms_models.dart';
-import 'package:fms_client/ui/filter_activity.dart';
-import 'package:fms_client/ui/settings_activity.dart';
+import 'package:fms_client/activities/filter_activity.dart';
+import 'package:fms_client/activities/settings_activity.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'map_fragment.dart';
+import 'package:fms_client/fragments/map_fragment.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class MainActivity extends StatefulWidget {

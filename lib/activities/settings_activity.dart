@@ -9,98 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:fms_client/redux/utils.dart';
 
-
-class Settings {
-  Color lifeStoryLines = Color.fromRGBO(0, 255, 0, 1);
-  Color familyTreeLines = Color.fromRGBO(0, 0, 255, 1);
-  Color spouseLines = Color.fromRGBO(255, 0, 0, 1);
-
-  Color baptismEvent = hslToColor(BitmapDescriptor.hueCyan, 1, 0.5);
-  Color birthEvent = hslToColor(BitmapDescriptor.hueOrange, 1, 0.5);
-  Color censusEvent = hslToColor(BitmapDescriptor.hueRose, 1, 0.5);
-  Color christeningEvent = hslToColor(BitmapDescriptor.hueYellow, 1, 0.5);
-  Color marriageEvent = hslToColor(BitmapDescriptor.hueAzure, 1, 0.5);
-  Color travelEvent =  hslToColor(BitmapDescriptor.hueMagenta, 1, 0.5);
-  Color deathEvent =hslToColor(BitmapDescriptor.hueViolet, 1, 0.5);
-
-  bool lifeStoryLinesView = true;
-  bool familyTreeLinesView = true;
-  bool spouseLinesView = true;
-
-  MapType mapType = MapType.normal;
-
-  void setDefault() {
-    lifeStoryLines = Color.fromRGBO(0, 255, 0, 1);
-    familyTreeLines = Color.fromRGBO(0, 0, 255, 1);
-    spouseLines = Color.fromRGBO(255, 0, 0, 1);
-
-    baptismEvent = hslToColor(BitmapDescriptor.hueCyan, 1, 0.5);
-    birthEvent = hslToColor(BitmapDescriptor.hueOrange, 1, 0.5);
-    censusEvent = hslToColor(BitmapDescriptor.hueRose, 1, 0.5);
-    christeningEvent = hslToColor(BitmapDescriptor.hueYellow, 1, 0.5);
-    marriageEvent = hslToColor(BitmapDescriptor.hueAzure, 1, 0.5);
-    travelEvent =  hslToColor(BitmapDescriptor.hueMagenta, 1, 0.5);
-    deathEvent =hslToColor(BitmapDescriptor.hueViolet, 1, 0.5);
-
-    lifeStoryLinesView = true;
-    familyTreeLinesView = true;
-    spouseLinesView = true;
-  }
-
-  void _load() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    lifeStoryLinesView = preferences.getBool("lifeStoryLinesView") ?? true;
-    familyTreeLinesView = preferences.getBool("familyTreeLinesView") ?? true;
-    spouseLinesView = preferences.getBool("spouseLinesView") ?? true;
-
-    lifeStoryLines = Color(preferences.getInt("lifeStoryLines") ?? Color.fromRGBO(0, 255, 0, 1).value);
-    familyTreeLines = Color(preferences.getInt("familyTreeLines") ?? Color.fromRGBO(0, 0, 255, 1).value);
-    spouseLines = Color(preferences.getInt("spouseLines") ?? Color.fromRGBO(255, 0, 0, 1).value);
-
-    birthEvent = Color(preferences.getInt("birthEvent")) ?? hslToColor(BitmapDescriptor.hueBlue, 1, 0.5);
-    baptismEvent = Color(preferences.getInt("baptismEvent")) ?? hslToColor(BitmapDescriptor.hueCyan, 1, 0.5);
-    censusEvent = Color(preferences.getInt("censusEvent")) ?? hslToColor(BitmapDescriptor.hueRose, 1, 0.5);
-    christeningEvent = Color(preferences.getInt("christeningEvent")) ?? hslToColor(BitmapDescriptor.hueYellow, 1, 0.5);
-    marriageEvent = Color(preferences.getInt("marriageEvent")) ?? hslToColor(BitmapDescriptor.hueAzure, 1, 0.5);
-    travelEvent = Color(preferences.getInt("travelEvent")) ?? hslToColor(BitmapDescriptor.hueMagenta, 1, 0.5);
-    deathEvent = Color(preferences.getInt("deathEvent")) ?? hslToColor(BitmapDescriptor.hueViolet, 1, 0.5);
-
-    mapType = MapType.values[preferences.getInt("mapType") ?? MapType.normal.index];
-  }
-
-  void _save() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setBool("lifeStoryLinesView", lifeStoryLinesView);
-    preferences.setBool("familyTreeLinesView", familyTreeLinesView);
-    preferences.setBool("spouseLinesView", spouseLinesView);
-
-    preferences.setInt("lifeStoryLines", lifeStoryLines.value);
-    preferences.setInt("familyTreeLines", familyTreeLines.value);
-    preferences.setInt("spouseLines", spouseLines.value);
-
-    preferences.setInt("baptismEvent", baptismEvent.value);
-    preferences.setInt("birthEvent", birthEvent.value);
-    preferences.setInt("censusEvent", censusEvent.value);
-    preferences.setInt("christeningEvent", christeningEvent.value);
-    preferences.setInt("marriageEvent", marriageEvent.value);
-    preferences.setInt("travelEvent", travelEvent.value);
-    preferences.setInt("deathEvent", deathEvent.value);
-    preferences.setInt("mapType", mapType.index);
-  }
-
-  static Settings _instance;
-
-  static Settings getInstance() {
-    if (_instance == null) {
-      _instance = Settings();
-      _instance._load();
-    }
-    return _instance;
-  }
-}
-
-
-
 class SettingActivity extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => SettingActivityState();
@@ -135,7 +43,7 @@ class SettingActivityState extends State<SettingActivity> with SingleTickerProvi
 
   @override
   void dispose() {
-    settings._save();
+    settings.save();
     super.dispose();
   }
 
